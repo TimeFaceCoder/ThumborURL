@@ -337,6 +337,60 @@ static NSString *const TUIsThumborizedURLKey = @"TUIsThumborizedURL";
     return URL;
 }
 
++ (id)TF_thumborURLWithOptions:(TUOptions *)options imageURL:(NSURL *)imageURL securityKey:(NSString *)securityKey {
+    
+    NSAssert(securityKey.length > 0, @"securityKey required");
+    
+    // Remove the query from calculating the hash.
+    NSString *imageURLString = imageURL.absoluteString;
+    
+    NSString *query = imageURL.query;
+    if (query != nil) {
+        imageURLString = [imageURLString substringToIndex:imageURLString.length - (query.length + 1)];
+    }
+    // Encrypt URL based declared encryption scheme.
+    NSString *suffix = nil;
+    NSData *result = nil;
+    switch (options.encryption) {
+        case TUEncryptionModeAES128:
+            suffix = imageURLString;
+            result = TUCreateEncryptedAES128Data(imageURLString, options.URLOptionsPath, securityKey);
+            break;
+            
+        case TUEncryptionModeHMACSHA1:
+        default: {
+            // It is important not to generate the URL by using stringByAppendingPathComponent because the trimmedString is not
+            // a filesystem path component. As such, http://lol gets turned into http:/lol by the API which
+            // Thumbor will then reject causing all images in our app which use Thumbor to stop loading :)
+            NSString *trimmedString = [imageURLString stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
+            NSString *optionsString = options.URLOptionsPath;
+            
+            if (optionsString.length) {
+                suffix = [NSString stringWithFormat:@"%@/%@", optionsString, trimmedString];
+            } else {
+                suffix = trimmedString;
+            }
+            
+            result = TUCreateEncryptedHMACSHA1Data(suffix, securityKey);
+            break;
+        }
+    }
+    
+    // Base 64 encode the data. Replace invalid characters so the URL will be valid. Thumbor expects this replacement.
+    NSMutableString *base64String = [result.base64Encoding mutableCopy];
+    [base64String replaceOccurrencesOfString:@"+" withString:@"-"options:NSLiteralSearch range:NSMakeRange(0, base64String.length)];
+    [base64String replaceOccurrencesOfString:@"/" withString:@"_"options:NSLiteralSearch range:NSMakeRange(0, base64String.length)];
+    
+    NSString *finalURL = [NSString stringWithFormat:@"/%@?image=%@", imageURLString, base64String];
+    
+    NSURL *URL = [NSURL URLWithString:finalURL];
+    
+    objc_setAssociatedObject(URL, (__bridge void *)TUIsThumborizedURLKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    return URL;
+}
+
+
 #pragma mark - Properties
 
 - (BOOL)isThumborizableURL;

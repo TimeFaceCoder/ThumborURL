@@ -69,25 +69,25 @@ typedef NS_ENUM(NSUInteger, TUEncryptionMode) {
 /// Make a copy of options and assign a new size.
 - (TUOptions *)optionsBySettingSize:(CGSize)newSize;
 
-@property (nonatomic, assign) CGSize targetSize;
-@property (nonatomic, assign) BOOL smart;
-@property (nonatomic, assign) BOOL debug;
-@property (nonatomic, assign) BOOL meta;
-@property (nonatomic, assign) CGRect crop;
+@property (nonatomic, assign) CGSize                targetSize;
+@property (nonatomic, assign) BOOL                  smart;
+@property (nonatomic, assign) BOOL                  debug;
+@property (nonatomic, assign) BOOL                  meta;
+@property (nonatomic, assign) CGRect                crop;
 
-@property (nonatomic, assign) TUFitInMode fitIn;
+@property (nonatomic, assign) TUFitInMode           fitIn;
 
-@property (nonatomic, assign) TUVerticalAlignment valign;
+@property (nonatomic, assign) TUVerticalAlignment   valign;
 @property (nonatomic, assign) TUHorizontalAlignment halign;
 
-@property (nonatomic, assign) BOOL vflip;
-@property (nonatomic, assign) BOOL hflip;
+@property (nonatomic, assign) BOOL                  vflip;
+@property (nonatomic, assign) BOOL                  hflip;
 
-@property (nonatomic, copy) NSArray *filters;
+@property (nonatomic, copy  ) NSArray               *filters;
 
-@property (nonatomic, assign) CGFloat scale;
+@property (nonatomic, assign) CGFloat               scale;
 
-@property (nonatomic, assign) TUEncryptionMode encryption;
+@property (nonatomic, assign) TUEncryptionMode      encryption;
 
 @end
 
@@ -106,6 +106,8 @@ typedef NS_ENUM(NSUInteger, TUEncryptionMode) {
 @interface NSURL (ThumborURL)
 
 + (id)TU_secureURLWithOptions:(TUOptions *)options imageURL:(NSURL *)imageURL baseURL:(NSURL *)baseURL securityKey:(NSString *)securityKey;
+
++ (id)TF_thumborURLWithOptions:(TUOptions *)options imageURL:(NSURL *)imageURL securityKey:(NSString *)securityKey;
 
 @property (nonatomic, assign, readonly, getter=isThumborizableURL) BOOL thumborizableURL;
 @property (nonatomic, assign, readonly, getter=isThumborizedURL) BOOL thumborizedURL;
